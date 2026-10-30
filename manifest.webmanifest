@@ -1,0 +1,19 @@
+{
+  "name": "5kg 增肌訓練器",
+  "short_name": "5kg訓練",
+  "description": "繁體中文推拉腿健身訓練、倒數與紀錄",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f7f4",
+  "theme_color": "#102b2b",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
