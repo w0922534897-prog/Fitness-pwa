@@ -222,11 +222,11 @@ export function openDB() {
     };
   });
 }
-export function save(s) {
+export function save(s, draftOnly = false) {
+  if (draftOnly) session(s.active, true);
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(["workspace", "history"], "readwrite"),
+    const tx = db.transaction(draftOnly ? "workspace" : ["workspace", "history"], "readwrite"),
       store = tx.objectStore("workspace"),
-      history = tx.objectStore("history"),
       r = store.get("current");
     let conflict = false;
     const next = new Map();
@@ -236,6 +236,16 @@ export function save(s) {
         tx.abort();
         return;
       }
+      if (draftOnly) {
+        if (!r.result || r.result.data.active?.id !== s.active.id) {
+          conflict = true;
+          tx.abort();
+          return;
+        }
+        store.put({ revision: revision + 1, data: { ...r.result.data, active: s.active } }, "current");
+        return;
+      }
+      const history = tx.objectStore("history");
       for (const h of s.history) {
         const json = JSON.stringify(h);
         next.set(h.id, json);
@@ -249,7 +259,7 @@ export function save(s) {
     };
     tx.oncomplete = () => {
       revision++;
-      archived = next;
+      if (!draftOnly) archived = next;
       resolve();
     };
     tx.onabort = () =>

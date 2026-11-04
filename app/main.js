@@ -106,16 +106,19 @@ function serialize(fn) {
   queue = queue.then(fn).catch((e) => say(e.message || String(e)));
   return queue;
 }
-function change(fn, after = render) {
+function change(fn, after = render, draftId = null) {
   return serialize(async () => {
-    const old = structuredClone(state);
+    if (draftId && (route !== "active" || state.active?.id !== draftId))
+      throw Error("訓練畫面已切換，請確認本組紀錄。");
+    const old = structuredClone(draftId ? state.active : state);
     let result;
     try {
       result = fn();
-      validate(state);
-      await save(state);
+      if (!draftId) validate(state);
+      await save(state, !!draftId);
     } catch (e) {
-      state = old;
+      if (draftId) state.active = old;
+      else state = old;
       render();
       throw e;
     }
@@ -478,10 +481,11 @@ app.addEventListener("change", async (ev) => {
       n = +f.dataset.n;
     change(
       () => {
-        if (!h.items.includes(i)) throw Error("紀錄已變更。");
+        if (session() !== h || !h.items.includes(i)) throw Error("紀錄已變更。");
         updateLog(i.logs[n], d);
       },
       () => say("本組輸入已保存"),
+      route === "active" ? h.id : null,
     );
   }
 });
@@ -643,6 +647,8 @@ app.addEventListener("submit", (ev) => {
       if (dest) go(dest);
       else render();
     },
+    route === "active" && ["log", "switch", "customtimer", "sessionnote"].includes(action)
+      ? state.active.id : null,
   );
 });
 window.addEventListener("hashchange", () => {

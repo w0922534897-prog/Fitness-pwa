@@ -1,4 +1,4 @@
-const root=self.registration.scope,prefix='fitflow:'+root+':',cacheName=prefix+'6b8aa7f8c23cb8d4';
+const root=self.registration.scope,prefix='fitflow:'+root+':',cacheName=prefix+'c5c89fe241a2d24d';
 const files=["index.html","legacy.html","icon.svg","style.css","manifest.webmanifest","app/core.js","app/data.js","app/demo.js","app/main.js","app/stats.js","app/storage.js","app/ui.js","app/views.js","icon-180.png","icon-192.png","icon-512.png"].map(f=>new URL(f,root).href);
 self.addEventListener('install',ev=>ev.waitUntil(caches.open(cacheName).then(c=>c.addAll(files.map(url=>new Request(url,{cache:'reload'}))))));
 self.addEventListener('activate',ev=>ev.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith(prefix)&&k!==cacheName)await caches.delete(k);await self.clients.claim()})()));
