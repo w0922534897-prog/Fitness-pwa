@@ -1,0 +1,20 @@
+{
+  "name": "fitflow",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.js",
+    "build": "node scripts/build.js",
+    "test": "node --test tests/core.test.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app scripts tests",
+    "test:e2e": "node tests/browser.js",
+    "test:webkit": "node tests/browser.js --webkit"
+  },
+  "devDependencies": {
+    "eslint": "^10.14.0",
+    "playwright-core": "^1.64.1",
+    "typescript": "^5.9.3"
+  }
+}
