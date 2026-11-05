@@ -62,6 +62,7 @@ function render() {
   if (!state) return;
   [route, id] = location.hash.slice(1).split("/").map(decodeURIComponent);
   route = route || "home";
+  app.classList.toggle("active-workout", route === "active" && !!state.active);
   const q = state.settings;
   document.documentElement.dataset.theme =
     q.theme === "system"
@@ -156,6 +157,13 @@ function tick() {
   const t = h.timer,
     n = t ? left(t) : h.items[h.index].e.rest;
   if (route === "active") {
+    const dock = document.querySelector("#rest-dock");
+    if (dock) {
+      dock.hidden = !t || t.mode === "idle";
+      document.querySelector("#dock-time").textContent = clock(n);
+      document.querySelector("#dock-status").textContent =
+        t?.mode === "pause" ? "休息已暫停" : n === 0 ? "休息結束" : "組間休息";
+    }
     const el = document.querySelector("#remaining");
     if (el) {
       el.textContent = clock(n);
@@ -273,6 +281,18 @@ app.addEventListener("click", (ev) => {
   const b = ev.target.closest("button");
   if (!b) return;
   if (b.dataset.ui) {
+    if (b.dataset.ui === "timer" || b.dataset.ui === "next") {
+      const target = b.dataset.ui === "timer"
+        ? document.querySelector("#ring")?.closest("section")
+        : document.querySelector('form[data-form="log"][data-status="待做"]') ||
+          document.querySelector('form[data-form="switch"]');
+      if (target) {
+        target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ block: "center", behavior: "instant" });
+      }
+      return;
+    }
     playDemo(b.dataset.ui === "replay");
     return;
   }

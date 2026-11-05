@@ -47,6 +47,21 @@ try {
   await page.waitForFunction(
     () => document.querySelector("#timerstatus")?.textContent === "倒數中",
   );
+  await page.locator("#rest-dock").waitFor({ state: "visible" });
+  await page.getByRole("button", { name: "下一組", exact: true }).click();
+  assert.equal(await page.evaluate(() => document.activeElement?.dataset.n), "1");
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({width, height:844});
+    assert.ok(await page.evaluate(() => {
+      const dock = document.querySelector("#rest-dock").getBoundingClientRect();
+      const nav = document.querySelector("nav").getBoundingClientRect();
+      return dock.left >= 0 && dock.right <= innerWidth && dock.bottom <= nav.top &&
+        document.documentElement.scrollWidth <= innerWidth;
+    }), "rest shortcuts fit width " + width);
+  }
+  await page.setViewportSize({width:375, height:812});
+  await page.getByRole("button", { name: "倒數控制", exact: true }).click();
+  assert.ok(await page.evaluate(() => document.activeElement?.contains(document.querySelector("#ring"))));
   await page.reload();
   await page.waitForFunction(
     () => document.querySelector("#timerstatus")?.textContent === "倒數中",

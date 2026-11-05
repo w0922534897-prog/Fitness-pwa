@@ -311,7 +311,7 @@ function logForm(s, e, l, n, history = false) {
   return (
     '<form data-form="log" data-n="' +
     n +
-    '" class="set"><b>第 ' +
+    '" data-status="' + l.status + '" class="set" tabindex="-1"><b>第 ' +
     (n + 1) +
     " 組 · " +
     l.status +
@@ -368,7 +368,7 @@ export function workout(s, h, history = false, idx = h?.index || 0) {
     (all || 1) +
     '" value="' +
     completed(h).length +
-    '"></progress>' +
+    '" aria-label="已完成組數"></progress>' +
     form(
       "switch",
       opt(
@@ -432,6 +432,7 @@ export function workout(s, h, history = false, idx = h?.index || 0) {
         (history ? "" : btn("新增一組", "addset") + btn("跳過動作", "skipex")),
     ) +
     panel("訓練筆記", form("sessionnote", field("當天感受", "note", h.note))) +
+    (history ? "" : '<aside id="rest-dock" aria-label="休息倒數快捷列" hidden><div><small id="dock-status">組間休息</small><strong id="dock-time"></strong></div><button type="button" data-ui="timer">倒數控制</button><button type="button" data-ui="next">下一組</button></aside>') +
     (history
       ? btn("刪除此紀錄", "delhistory", h.id)
       : btn(h.pauseAt ? "繼續訓練" : "暫停訓練", "pausework") +

@@ -173,7 +173,11 @@ summary {
 }
 .demo svg {
   height: 180px;
-  max-width: 48%;
+  max-width: 100%;
+  width: 240px;
+}
+.demo:has(svg + svg) svg {
+  max-width: 50%;
 }
 .controls {
   display: flex;
@@ -181,6 +185,8 @@ summary {
   gap: 6px;
 }
 nav {
+  z-index: 3;
+  min-height: calc(60px + env(safe-area-inset-bottom));
   position: fixed;
   bottom: 0;
   left: 0;
@@ -190,6 +196,48 @@ nav {
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
   overflow-x: auto;
+}
+button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+.set[data-status="完成"] {
+  border-left: 4px solid var(--accent);
+  padding-left: 12px;
+}
+.set .primary {
+  min-height: 48px;
+}
+.set:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+#remaining, #dock-time, #elapsed {
+  font-variant-numeric: tabular-nums;
+}
+#rest-dock {
+  position: fixed;
+  z-index: 2;
+  bottom: calc(68px + env(safe-area-inset-bottom));
+  left: max(12px, env(safe-area-inset-left), calc((100vw - 748px) / 2));
+  right: max(12px, env(safe-area-inset-right), calc((100vw - 748px) / 2));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 4px 20px #0002;
+}
+#rest-dock[hidden] { display: none; }
+#rest-dock div { flex: 1; min-width: 0; }
+#rest-dock small, #dock-time { display: block; }
+#dock-time { font-size: 1.5rem; line-height: 1.2; }
+#rest-dock button { margin: 0; padding-inline: 10px; }
+.active-workout { padding-bottom: calc(220px + env(safe-area-inset-bottom)); }
+@media (max-height: 480px) {
+  #rest-dock { position: static; margin-block: 12px; }
 }
 nav a {
   flex: 1;
