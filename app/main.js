@@ -63,6 +63,7 @@ function render() {
   [route, id] = location.hash.slice(1).split("/").map(decodeURIComponent);
   route = route || "home";
   app.classList.toggle("active-workout", route === "active" && !!state.active);
+  app.dataset.page = route;
   const q = state.settings;
   document.documentElement.dataset.theme =
     q.theme === "system"

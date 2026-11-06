@@ -91,7 +91,12 @@ export function home(s) {
     recent = byDate(s.history)[0],
     today = day(Date.now());
   return (
-    title("FITFLOW  /  訓練日誌", today.replaceAll("-", ".")) +
+    title("今天，為自己留一點時間", today.replaceAll("-", ".")) +
+    '<ol class="cycle-strip" aria-label="三練一休進度">' +
+    s.cycle.map((id, n) => '<li ' + (n === s.cursor ? 'aria-current="step"' : '') +
+      '><span>DAY ' + (n + 1) + '</span><strong>' +
+      esc(s.plans.find(x => x.id === id)?.name || "休息") + '</strong></li>').join("") +
+    '</ol><div class="home-layout">' +
     (s.active
       ? panel(
           "偵測到尚未完成的訓練",
@@ -129,7 +134,7 @@ export function home(s) {
         : btn("結束休息日", "restday", "", "primary")) +
     btn("延後一天", "delay") +
     "</section>" +
-    panel(
+    '<div class="home-summary">' + panel(
       "近期紀錄",
       recent
         ? link(
@@ -145,7 +150,7 @@ export function home(s) {
         s.history.reduce((a, h) => a + completed(h).length, 0) +
         " 組 " +
         link("查看紀錄", "history"),
-    )
+    ) + '</div></div>'
   );
 }
 export function plansView(s, id) {

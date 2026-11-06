@@ -35,6 +35,17 @@ try {
     await page.waitForFunction(() => document.querySelector("nav a"));
   };
   await nav("home");
+  assert.equal(await page.locator('.cycle-strip [aria-current="step"]').count(), 1);
+  for (const width of [320, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "home layout " + width);
+    if (width === 1280) assert.ok(await page.evaluate(() => {
+      const nav = document.querySelector("nav").getBoundingClientRect();
+      const hero = document.querySelector(".hero").getBoundingClientRect();
+      return nav.right <= hero.left && nav.width < 250;
+    }), "desktop navigation sits beside content");
+  }
+  await page.setViewportSize({width:375, height:812});
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
   await ctx.setOffline(true);
