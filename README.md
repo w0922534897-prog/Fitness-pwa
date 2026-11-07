@@ -1,6 +1,6 @@
 # FitFlow 個人訓練日誌
 
-免帳號的繁體中文居家啞鈴 PWA。首次開啟為空白訓練歷史，內建三練一休課表與 15 種原創向量演示。資料保存在目前瀏覽器。
+可免帳號使用，並支援 Email 帳號同步的繁體中文居家啞鈴 PWA。首次開啟為空白訓練歷史，內建三練一休課表與 15 種原創向量演示。訪客資料保存在目前瀏覽器；登入後可將課表與紀錄同步到同一帳號的其他裝置。
 
 ## 在 Windows 本機使用
 
@@ -35,5 +35,7 @@ npm.cmd run build
 | scripts/build.js、scripts/serve.js | 產生 PNG 圖示、內容版本快取、可部署目錄與本機伺服器 |
 | tests/core.test.js、tests/browser.js | 核心單元、Chrome 離線整合與遷移測試 |
 
-正式網站使用原生 ES modules、SVG、CSS、IndexedDB 及 Service Worker，執行時無第三方套件或服務。TypeScript、ESLint、Playwright Core 僅供開發。使用說明見 [操作手冊](USER_GUIDE.md)、[備份說明](DATA_BACKUP.md)、[部署手冊](DEPLOYMENT.md) 與 [測試報告](TESTING.md)。
+正式網站使用原生 ES modules、SVG、CSS、IndexedDB 及 Service Worker，帳號功能使用隨站快取的 Supabase SDK 與 Supabase Auth / Database。訪客模式仍可離線使用。TypeScript、ESLint、Playwright Core 僅供開發。使用說明見 [操作手冊](USER_GUIDE.md)、[備份說明](DATA_BACKUP.md)、[部署手冊](DEPLOYMENT.md) 與 [測試報告](TESTING.md)。
 
+
+帳號設定與同步驗證見 [Supabase 說明](supabase/README.md)。

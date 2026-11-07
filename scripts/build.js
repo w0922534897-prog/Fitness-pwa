@@ -7,6 +7,8 @@ import {
 } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { deflateSync } from "node:zlib";
+import { build as bundle } from "esbuild";
+import { fileURLToPath } from "node:url";
 export async function build() {
   const files = [
     "index.html",
@@ -20,6 +22,13 @@ export async function build() {
   ];
   await mkdir("dist/app", { recursive: true });
   for (const f of files) await copyFile(f, "dist/" + f);
+  await bundle({
+    absWorkingDir: process.cwd(),
+    stdin: {contents: 'export { createClient } from "@supabase/supabase-js";', resolveDir: fileURLToPath(new URL("../", import.meta.url))},
+    bundle: true, format: "esm", platform: "browser", target: "es2022",
+    minify: true, outfile: "dist/vendor/supabase.js",
+  });
+  files.push("vendor/supabase.js");
   for (const n of [180, 192, 512]) {
     const f = "icon-" + n + ".png";
     await writeFile("dist/" + f, icon(n));

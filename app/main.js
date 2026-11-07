@@ -30,6 +30,7 @@ import {
 import { stats } from "./stats.js";
 import { esc, btn, clock, fmt } from "./ui.js";
 import { stopDemo, playDemo } from "./demo.js";
+import { createAccount } from "./account.js";
 const app = document.querySelector("#app"),
   notice = document.querySelector("#notice");
 let state,
@@ -57,6 +58,10 @@ const session = () =>
 const currentIndex = () =>
   route === "record" ? recordIndex : state.active.index;
 const item = () => session().items[currentIndex()];
+const account = createAccount({
+  getState: () => state, setState: value => { state = value; },
+  serialize, render, say,
+});
 function render() {
   stopDemo();
   if (!state) return;
@@ -82,6 +87,12 @@ function render() {
     stats: () => stats(state, statsFilter),
   };
   app.innerHTML = (views[route] || views.home)();
+  if (route === "settings") {
+    const host = document.createElement("div");
+    host.id = "account-panel";
+    host.innerHTML = account.view();
+    app.insertBefore(host, app.querySelector("section"));
+  }
   if (route === "active" && state.active?.pauseAt)
     for (const el of app.querySelectorAll(
       "form:not([data-form=sessionnote]) input,form:not([data-form=sessionnote]) button,form select,button[data-act=timer],button[data-act=addset],button[data-act=skipex]",
@@ -125,6 +136,7 @@ function change(fn, after = render, draftId = null) {
       throw e;
     }
     after?.(result);
+    account.changed();
   });
 }
 let lastWall = Date.now(),
@@ -300,6 +312,7 @@ app.addEventListener("click", (ev) => {
   const act = b.dataset.act;
   if (!act) return;
   ev.preventDefault();
+  if (act.startsWith("account-")) { void account.action(act).catch(e => say(e.message)); return; }
   const arg = b.dataset.arg,
     n = Number(arg),
     today = day(Date.now());
@@ -517,6 +530,7 @@ app.addEventListener("submit", (ev) => {
     action = f.dataset.form,
     n = Number(f.dataset.n),
     submit = ev.submitter?.value;
+  if (action.startsWith("account-")) { void account.submit(action, d, submit).catch(e => say(e.message)); return; }
   if (action === "search") {
     filter = d;
     render();
@@ -696,7 +710,7 @@ matchMedia("(prefers-reduced-motion: reduce)").addEventListener(
   render,
 );
 try {
-  state = await openDB();
+  state = await account.open();
   render();
   setInterval(tick, 350);
 } catch (e) {

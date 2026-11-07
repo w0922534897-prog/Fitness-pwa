@@ -171,10 +171,17 @@ export function merge(local, incoming) {
 }
 let db,
   revision = 0,
+  syncMetadata = null,
   archived = new Map();
-export function openDB() {
+export function getSyncMetadata() { return syncMetadata; }
+export function openDB(userId = null) {
+  if (userId !== null && !/^[0-9a-f-]{36}$/i.test(userId)) throw Error("無效帳號。");
+  db?.close();
+  revision = 0;
+  syncMetadata = null;
+  archived = new Map();
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open("fitflow-local", 2);
+    const req = indexedDB.open(userId ? "fitflow-account-" + userId : "fitflow-local", 2);
     req.onupgradeneeded = () => {
       if (!req.result.objectStoreNames.contains("workspace"))
         req.result.createObjectStore("workspace");
@@ -204,11 +211,13 @@ export function openDB() {
       db.onversionchange = () => db.close();
       const tx = db.transaction(["workspace", "history"]),
         r = tx.objectStore("workspace").get("current"),
+        sync = tx.objectStore("workspace").get("sync"),
         rows = tx.objectStore("history").index("start").getAll();
       tx.onabort = () => reject(tx.error);
       tx.oncomplete = () => {
         try {
           revision = r.result?.revision || 0;
+          syncMetadata = sync.result || null;
           archived = new Map(rows.result.map((h) => [h.id, JSON.stringify(h)]));
           resolve(
             r.result
@@ -222,7 +231,7 @@ export function openDB() {
     };
   });
 }
-export function save(s, draftOnly = false) {
+export function save(s, draftOnly = false, sync = undefined) {
   if (draftOnly) session(s.active, true);
   return new Promise((resolve, reject) => {
     const tx = db.transaction(draftOnly ? "workspace" : ["workspace", "history"], "readwrite"),
@@ -236,6 +245,7 @@ export function save(s, draftOnly = false) {
         tx.abort();
         return;
       }
+      if (sync !== undefined) store.put(sync, "sync");
       if (draftOnly) {
         if (!r.result || r.result.data.active?.id !== s.active.id) {
           conflict = true;
@@ -259,6 +269,7 @@ export function save(s, draftOnly = false) {
     };
     tx.oncomplete = () => {
       revision++;
+      if (sync !== undefined) syncMetadata = sync;
       if (!draftOnly) archived = next;
       resolve();
     };
